@@ -20,7 +20,7 @@ API_KEY_PATTERN = r"^sk-[A-Za-z0-9]{48}$"
 # Dictionary to store ongoing requests and their results
 ongoing_requests = {}
 
-def process_request(request_id, api_key, style, topic):
+def process_request(request_id, api_key, task, prompt_agent_1, prompt_agent_2):
     config_list = [
         {
             'model': 'gpt-4-1106-preview',
@@ -35,16 +35,16 @@ def process_request(request_id, api_key, style, topic):
         "temperature": 0
     }
 
-    editor = autogen.AssistantAgent(
-        name="content_editor",
+    agent_1 = autogen.AssistantAgent(
+        name="agent_1",
         llm_config=llm_config,
-        system_message=f"Experienced youtube content editor."
+        system_message=prompt_agent_1
     )
 
-    writer = autogen.AssistantAgent(
-        name="script_writer",
+    agent_2 = autogen.AssistantAgent(
+        name="agent_2",
         llm_config=llm_config,
-        system_message=f"Script writer with a proven record in writing viral video scripts for successful youtubers."
+        system_message=prompt_agent_2
     )
 
     user_proxy = autogen.UserProxyAgent(
@@ -57,10 +57,8 @@ def process_request(request_id, api_key, style, topic):
         system_message="Reply TERMINATE if the task has been solved at full satisfaction. Otherwise, reply CONTINUE, or the reason why the task is not solved yet."
     )
 
-    groupchat = autogen.GroupChat(agents=[user_proxy, editor, writer], messages=[], max_round=12)
+    groupchat = autogen.GroupChat(agents=[user_proxy, agent_1, agent_2], messages=[], max_round=12)
     manager = autogen.GroupChatManager(groupchat=groupchat, llm_config=llm_config)
-
-    task = f"Give me a viral youtube shorts (less than 50 seconds!) script about {topic}. The style of the video will be {style}. Separate the script into scenes. Each scene is separated by a ';'. Only output the script text. Don't output any meta descriptions like 'scene:' or (opening shot) etc., just the text. Make sure the topic is trending and edited."
 
     user_proxy.initiate_chat(manager, message=task, clear_history=True)
 
@@ -68,7 +66,7 @@ def process_request(request_id, api_key, style, topic):
     ongoing_requests[request_id]['status'] = 'completed'
 
 
-@app.route('/submit_script_request', methods=['POST'])
+@app.route('/submit_task', methods=['POST'])
 def submit_script_request():
     data = request.get_json()
     logging.info(f"Received request data: {data}")
@@ -76,18 +74,22 @@ def submit_script_request():
     if not data:
         abort(400, "Invalid data format")
 
-    topic = data.get('topic')
-    style = data.get('style')
+    task = data.get('task')
+    prompt_agent_1 = data.get('prompt_agent_1')
+    prompt_agent_2 = data.get('prompt_agent_2')
     api_key = data.get('api_key')
 
-    if not topic:
-        abort(400, "Missing topic in request data")
+    if not task:
+        abort(400, 'Missing "task" in request data')
 
     if not api_key:
-        abort(400, "Missing api_key in request data")
+        abort(400, 'Missing "api_key" in request data')
 
-    if not style:
-        abort(400, "Missing style in request data")
+    if not prompt_agent_1:
+        abort(400, 'Missing "prompt_agent_1" in request data')
+
+    if not prompt_agent_2:
+        abort(400, 'Missing "prompt_agent_2" in request data')
 
     if not re.match(API_KEY_PATTERN, api_key):
         abort(403, "Invalid API key structure")
@@ -102,7 +104,7 @@ def submit_script_request():
     }
 
     # Start a new thread to process the request in the background
-    thread = threading.Thread(target=process_request, args=(request_id, api_key, style, topic))
+    thread = threading.Thread(target=process_request, args=(request_id, api_key, task, prompt_agent_1, prompt_agent_2))
     thread.start()
 
     response = jsonify(request_id=request_id)
