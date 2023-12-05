@@ -20,10 +20,10 @@ API_KEY_PATTERN = r"^sk-[A-Za-z0-9]{48}$"
 # Dictionary to store ongoing requests and their results
 ongoing_requests = {}
 
-def process_request(request_id, api_key, task, prompt_agent_1, prompt_agent_2):
+def process_request(request_id, api_key, model, task, prompt_agent_1, prompt_agent_2):
     config_list = [
         {
-            'model': 'gpt-4-1106-preview',
+            'model': model,
             'api_key': api_key
         }
     ]
@@ -78,6 +78,7 @@ def submit_script_request():
     prompt_agent_1 = data.get('prompt_agent_1')
     prompt_agent_2 = data.get('prompt_agent_2')
     api_key = data.get('api_key')
+    model = data.get('model')
 
     if not task:
         abort(400, 'Missing "task" in request data')
@@ -104,7 +105,7 @@ def submit_script_request():
     }
 
     # Start a new thread to process the request in the background
-    thread = threading.Thread(target=process_request, args=(request_id, api_key, task, prompt_agent_1, prompt_agent_2))
+    thread = threading.Thread(target=process_request, args=(request_id, api_key, model, task, prompt_agent_1, prompt_agent_2))
     thread.start()
 
     response = jsonify(request_id=request_id)
