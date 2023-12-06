@@ -114,7 +114,7 @@ def submit_script_request():
     return response
 
 
-@app.route('/get_script_result/<request_id>', methods=['GET'])
+@app.route('/get_result/<request_id>', methods=['GET'])
 def get_script_result(request_id):
     logging.info(f"Received request for ID: {request_id}")
     request_data = ongoing_requests.get(request_id)
