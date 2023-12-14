@@ -1,73 +1,75 @@
-# YouTube Script Generator API
+# Task Processor API
 
-This service provides an API to generate YouTube scripts based on a given topic. It uses `autogen` with 2 agents (script writer and editor) to generate viral youtube scripts.
+This API offers a service to process various tasks using an advanced agent-based system. It utilizes `autogen` with two specialized agents (Agent 1 and Agent 2) to handle and resolve complex tasks.
 
 ## Getting Started
 
 ### Prerequisites
 
-- Python 3.9+
-- Docker (optional, for containerization)
+- Python 3.9 or higher
+- Docker (optional for deploying in a containerized environment)
 
 ### Installation
 
 1. Clone the repository:
-```bash
-git clone https://github.com/dachkovski/flask-youtube-script-generator.git
-cd flask-youtube-script-generator
-```
+   ```bash
+   git clone https://github.com/example/flask-task-processor.git
+   cd flask-task-processor
+   ```
 
-2. (Optional) Set up a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows, use: venv\Scripts\activate
-```
+2. (Optional) Create and activate a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # For Windows: venv\Scripts\activate
+   ```
 
-3. Install the required packages:
-```bash
-pip install -r requirements.txt
-```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-### Running the Service
+### Running the API
 
-#### Directly:
+#### Direct Execution:
 
-```bash
-python app.py
-```
+   ```bash
+   python app.py
+   ```
 
-The service will start and listen on port 5001.
+   The service will be available on port 5001.
 
 #### Using Docker:
 
 1. Build the Docker image:
-```bash
-docker build -t flask-youtube-script-generator .
-```
+   ```bash
+   docker build -t flask-task-processor .
+   ```
 
-2. Run the Docker container:
-```bash
-docker run -p 5001:5001 flask-youtube-script-generator
-```
+2. Start the Docker container:
+   ```bash
+   docker run -p 5001:5001 flask-task-processor
+   ```
 
 ## Usage
 
-Send a POST request to the `/submit_script_request` endpoint with the following JSON payload:
+To use the service, send a POST request to `/submit_task` with a JSON payload:
 
 ```json
 {
-    "topic": "YOUR_TOPIC_HERE",
-    "style": "VIDEO_STYLE",    
-    "api_key": "YOUR_API_KEY_HERE"
+    "task": "YOUR_TASK_HERE",
+    "prompt_agent_1": "PROMPT_FOR_AGENT_1",
+    "prompt_agent_2": "PROMPT_FOR_AGENT_2",
+    "api_key": "YOUR_API_KEY",
+    "model": "MODEL_NAME"
 }
 ```
 
-The service will respond with a request ID. You can then use this ID to check the status and result of your request by making a GET request to `/get_script_result/<request_id>`.
+You will receive a request ID in response. To check the task's status and result, send a GET request to `/get_result/<request_id>`.
 
 ## Contributing
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+We welcome contributions. For significant changes, please open an issue first to discuss your ideas.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+This project is under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
